@@ -17,6 +17,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".HideActivity"
+            android:label="@string/title_activity_hide"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="jason.cruz.mysecretkeeper2016.MainActivity" />
+        </activity>
+        <activity
+            android:name=".RevealActivity"
+            android:label="@string/title_activity_reveal"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="jason.cruz.mysecretkeeper2016.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

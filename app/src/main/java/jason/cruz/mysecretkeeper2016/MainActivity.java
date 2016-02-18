@@ -1,5 +1,6 @@
 package jason.cruz.mysecretkeeper2016;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -48,5 +49,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    //Hide Button
+    public void hideActivity (View view)
+    {
+        Intent intent = new Intent(this, HideActivity.class);
+        startActivity(intent);
+    }
+
+    //Reveal Button
+    public void revealActivity (View view)
+    {
+        Intent intent = new Intent(this, RevealActivity.class);
+        startActivity(intent);
     }
 }
