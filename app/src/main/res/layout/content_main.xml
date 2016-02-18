@@ -15,8 +15,6 @@
         android:layout_height="wrap_content"
         android:text="Hide"
         android:id="@+id/bt_Hide"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:onClick="hideActivity" />
 
     <Button
@@ -24,8 +22,25 @@
         android:layout_height="wrap_content"
         android:text="Reveal"
         android:id="@+id/bt_Extract"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:onClick="revealActivity" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text=""
+        android:id="@+id/textView1"
+        android:layout_weight="0.8" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Jason Cruz. Copyright 2016"
+        android:id="@+id/textView"
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="100dp"/>
 
 </LinearLayout>
