@@ -1,24 +1,21 @@
 package jason.cruz.mysecretkeeper2016;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import java.io.ByteArrayOutputStream;
@@ -29,8 +26,10 @@ import java.io.IOException;
 
 public class HideActivity extends AppCompatActivity {
 
-    ImageView coverThumb;
+    ImageView coverThumb, secretThumb;
+    EditText et_CoverFile, et_SecretFile;
     int REQUEST_CAMERA = 0, SELECT_FILE = 1;
+    int fileChooserCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +39,9 @@ public class HideActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         coverThumb = (ImageView) findViewById(R.id.coverThumb);
-
+        secretThumb = (ImageView) findViewById(R.id.secretThumb);
+        et_CoverFile = (EditText) findViewById(R.id.et_CoverFile);
+        et_SecretFile  = (EditText) findViewById(R.id.et_SecretFile);
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -55,9 +56,17 @@ public class HideActivity extends AppCompatActivity {
     }
 
     //Hide Button
-    public void fileBrowser (View view)
+    public void fileBrowserCover (View view)
     {
         selectImage();
+        fileChooserCounter = 1;
+    }
+
+    //Hide Button
+    public void fileBrowserSecret (View view)
+    {
+        selectImage();
+        fileChooserCounter = 2;
     }
 
     private void selectImage() {
@@ -118,7 +127,17 @@ public class HideActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        coverThumb.setImageBitmap(thumbnail);
+        if (fileChooserCounter == 1)
+        {
+            coverThumb.setImageBitmap(thumbnail);
+            et_CoverFile.setText("From Camera");
+        }
+        else
+        {
+            secretThumb.setImageBitmap(thumbnail);
+            et_SecretFile.setText("Image");
+        }
+
     }
 
     @SuppressWarnings("deprecation")
@@ -131,52 +150,68 @@ public class HideActivity extends AppCompatActivity {
         cursor.moveToFirst();
 
         String selectedImagePath = cursor.getString(column_index);
-
         Bitmap bm;
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(selectedImagePath, options);
-        final int REQUIRED_SIZE = 200;
-        int scale = 1;
-        while (options.outWidth / scale / 2 >= REQUIRED_SIZE
-                && options.outHeight / scale / 2 >= REQUIRED_SIZE)
-            scale *= 2;
-        options.inSampleSize = scale;
-        options.inJustDecodeBounds = false;
-        bm = BitmapFactory.decodeFile(selectedImagePath, options);
 
-        coverThumb.setImageBitmap(bm);
-    }
-
-
-
-
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
-
-    /**
-     * Checks if the app has permission to write to device storage
-     *
-     * If the app does not has permission then the user will be prompted to grant permissions
-     *
-     * @param activity
-     */
-    public static void verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
+        if (fileChooserCounter == 1)
+        {
+            coverThumb.setImageURI(selectedImageUri);
+            et_CoverFile.setText(selectedImagePath);
         }
+        else
+        {
+           secretThumb.setImageURI(selectedImageUri);
+            et_SecretFile.setText(selectedImagePath);
+        }
+
+//
+//
+//
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inJustDecodeBounds = true;
+//
+//        BitmapFactory.decodeFile(selectedImagePath, options);
+//        final int REQUIRED_SIZE = 200;
+//        int scale = 1;
+//        while (options.outWidth / scale / 2 >= REQUIRED_SIZE
+//                && options.outHeight / scale / 2 >= REQUIRED_SIZE)
+//            scale *= 2;
+//        options.inSampleSize = scale;
+//        options.inJustDecodeBounds = false;
+//
+//        bm = BitmapFactory.decodeFile(selectedImagePath, options);
+//        et_CoverFile.setText(selectedImagePath);
+//        coverThumb.setImageBitmap(bm);
     }
+
+
+
+//
+//    // Storage Permissions
+//    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+//    private static String[] PERMISSIONS_STORAGE = {
+//            Manifest.permission.READ_EXTERNAL_STORAGE,
+//            Manifest.permission.WRITE_EXTERNAL_STORAGE
+//    };
+//
+//    /**
+//     * Checks if the app has permission to write to device storage
+//     *
+//     * If the app does not has permission then the user will be prompted to grant permissions
+//     *
+//     * @param activity
+//     */
+//    public static void verifyStoragePermissions(Activity activity) {
+//        // Check if we have write permission
+//        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//
+//        if (permission != PackageManager.PERMISSION_GRANTED) {
+//            // We don't have permission so prompt the user
+//            ActivityCompat.requestPermissions(
+//                    activity,
+//                    PERMISSIONS_STORAGE,
+//                    REQUEST_EXTERNAL_STORAGE
+//            );
+//        }
+//    }
 
 }
