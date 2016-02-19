@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,22 +19,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 public class HideActivity extends AppCompatActivity {
 
-    ImageView coverThumb, secretThumb;
+    ImageView coverThumb, secretThumb, stegoThumb;
     EditText et_CoverFile, et_SecretFile;
     int REQUEST_CAMERA = 0, SELECT_FILE = 1;
     int fileChooserCounter = 0;
+    long coverTime, secretTime;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +44,9 @@ public class HideActivity extends AppCompatActivity {
 
         coverThumb = (ImageView) findViewById(R.id.coverThumb);
         secretThumb = (ImageView) findViewById(R.id.secretThumb);
+        stegoThumb = (ImageView) findViewById(R.id.stegoThumb);
         et_CoverFile = (EditText) findViewById(R.id.et_CoverFile);
-        et_SecretFile  = (EditText) findViewById(R.id.et_SecretFile);
+        et_SecretFile = (EditText) findViewById(R.id.et_SecretFile);
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -58,56 +59,50 @@ public class HideActivity extends AppCompatActivity {
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+//CHECK IF STORAGE IS READABLE AND WRITABLE
+/*        boolean mExternalStorageAvailable = false;
+        boolean mExternalStorageWriteable = false;
+        String state = Environment.getExternalStorageState();
 
-            boolean mExternalStorageAvailable = false;
-            boolean mExternalStorageWriteable = false;
-            String state = Environment.getExternalStorageState();
-
-            if (Environment.MEDIA_MOUNTED.equals(state)) {
-                // Can read and write the media
-                mExternalStorageAvailable = mExternalStorageWriteable = true;
-            } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-                // Can only read the media
-                mExternalStorageAvailable = true;
-                mExternalStorageWriteable = false;
-            } else {
-                // Can't read or write
-                mExternalStorageAvailable = mExternalStorageWriteable = false;
-            }
-            et_CoverFile.setText("\n\nExternal Media: readable="
-                    + mExternalStorageAvailable + " writable=" + mExternalStorageWriteable);
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            // Can read and write the media
+            mExternalStorageAvailable = mExternalStorageWriteable = true;
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            // Can only read the media
+            mExternalStorageAvailable = true;
+            mExternalStorageWriteable = false;
+        } else {
+            // Can't read or write
+            mExternalStorageAvailable = mExternalStorageWriteable = false;
+        }
+        et_CoverFile.setText("\n\nExternal Media: readable="
+                + mExternalStorageAvailable + " writable=" + mExternalStorageWriteable);
 
         File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
                 "/MySecretKeeper2016");
         directory.mkdirs();
-
+*/
     }
 
     //Browse Cover File Button
-    public void fileBrowserCover (View view)
-    {
+    public void fileBrowserCover(View view) {
         selectImage();
         fileChooserCounter = 1;
     }
 
     //Browse Secret File Button
-    public void fileBrowserSecret (View view)
-    {
+    public void fileBrowserSecret(View view) {
         selectImage();
         fileChooserCounter = 2;
     }
 
     //Hide Button
-    public void hideSecret (View view)
-    {
+    public void hideSecret(View view) {
         File file1 = new File(et_CoverFile.getText().toString());
         File file2 = new File(et_SecretFile.getText().toString());
         File file3 = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
                 "/MySecretKeeper2016", System.currentTimeMillis() + "-MSK.jpg");
         // convert File to byte[]
-
-
-
         try {
             FileInputStream inStream = new FileInputStream(file1);
             FileInputStream inStream2 = new FileInputStream(file2);
@@ -135,7 +130,8 @@ public class HideActivity extends AppCompatActivity {
             bos.flush();
             bos.close();
 
-
+            Bitmap bitmap = decodeSampledBitmapFromFile(file3.getAbsolutePath(), 1000, 700);
+            stegoThumb.setImageBitmap(bitmap);
             Toast.makeText(getBaseContext(), "File saved successfully!",
                     Toast.LENGTH_LONG).show();
 
@@ -147,9 +143,8 @@ public class HideActivity extends AppCompatActivity {
     }
 
 
-
     private void selectImage() {
-        final CharSequence[] items = { "Take Photo", "Choose from Library", "Cancel" };
+        final CharSequence[] items = {"Take Photo", "Choose from Library", "Cancel"};
         AlertDialog.Builder builder = new AlertDialog.Builder(HideActivity.this);
         builder.setTitle("Add Photo!");
         builder.setItems(items, new DialogInterface.OnClickListener() {
@@ -157,7 +152,19 @@ public class HideActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int item) {
                 if (items[item].equals("Take Photo")) {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(intent, REQUEST_CAMERA);
+                    if (fileChooserCounter == 1) {
+                        coverTime = System.currentTimeMillis();
+                        File file = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
+                                "/MySecretKeeper2016", coverTime + ".jpg");
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                        startActivityForResult(intent, REQUEST_CAMERA);
+                    } else {
+                        secretTime = System.currentTimeMillis();
+                        File file = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
+                                "/MySecretKeeper2016", secretTime + ".jpg");
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                        startActivityForResult(intent, REQUEST_CAMERA);
+                    }
                 } else if (items[item].equals("Choose from Library")) {
                     Intent intent = new Intent(
                             Intent.ACTION_PICK,
@@ -187,48 +194,54 @@ public class HideActivity extends AppCompatActivity {
     }
 
     private void onCaptureImageResult(Intent data) {
-        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+        if (fileChooserCounter == 1) {
+            File file = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/MySecretKeeper2016", coverTime + ".jpg");
+            Bitmap bitmap = decodeSampledBitmapFromFile(file.getAbsolutePath(), 1000, 700);
+            coverThumb.setImageBitmap(bitmap);
+            et_CoverFile.setText(file.toString());
+        } else {
+            File file = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/MySecretKeeper2016", secretTime + ".jpg");
+            Bitmap bitmap = decodeSampledBitmapFromFile(file.getAbsolutePath(), 1000, 700);
+            secretThumb.setImageBitmap(bitmap);
+            et_SecretFile.setText(file.toString());
+        }
+    }
 
-        File destination = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
-                "/MySecretKeeper2016", System.currentTimeMillis() + ".jpg");
+    public static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) { // BEST QUALITY MATCH
 
-        FileOutputStream fo;
-        try {
-            destination.createNewFile();
-            fo = new FileOutputStream(destination);
-            fo.write(bytes.toByteArray());
-            fo.close();
-            Toast.makeText(getBaseContext(), "Wrote the camera photo!",
-                    Toast.LENGTH_LONG).show();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(getBaseContext(), "1 Didnt write the camera photo!",
-                    Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(getBaseContext(), "2 Didnt write the camera photo!",
-                    Toast.LENGTH_LONG).show();
+        //First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        // Calculate inSampleSize, Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        int inSampleSize = 1;
+
+        if (height > reqHeight) {
+            inSampleSize = Math.round((float) height / (float) reqHeight);
+        }
+        int expectedWidth = width / inSampleSize;
+
+        if (expectedWidth > reqWidth) {
+            //if(Math.round((float)width / (float)reqWidth) > inSampleSize) // If bigger SampSize..
+            inSampleSize = Math.round((float) width / (float) reqWidth);
         }
 
-        if (fileChooserCounter == 1)
-        {
-            coverThumb.setImageBitmap(thumbnail);
-            et_CoverFile.setText(destination.toString());
-        }
-        else
-        {
-            secretThumb.setImageBitmap(thumbnail);
-            et_SecretFile.setText(destination.toString());
-        }
-
+        options.inSampleSize = inSampleSize;
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(path, options);
     }
 
     @SuppressWarnings("deprecation")
     private void onSelectFromGalleryResult(Intent data) {
         Uri selectedImageUri = data.getData();
-        String[] projection = { MediaStore.MediaColumns.DATA };
+        String[] projection = {MediaStore.MediaColumns.DATA};
         Cursor cursor = managedQuery(selectedImageUri, projection, null, null,
                 null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
@@ -237,66 +250,12 @@ public class HideActivity extends AppCompatActivity {
         String selectedImagePath = cursor.getString(column_index);
         Bitmap bm;
 
-        if (fileChooserCounter == 1)
-        {
+        if (fileChooserCounter == 1) {
             coverThumb.setImageURI(selectedImageUri);
             et_CoverFile.setText(selectedImagePath);
-        }
-        else
-        {
-           secretThumb.setImageURI(selectedImageUri);
+        } else {
+            secretThumb.setImageURI(selectedImageUri);
             et_SecretFile.setText(selectedImagePath);
         }
-
-//
-//
-//
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true;
-//
-//        BitmapFactory.decodeFile(selectedImagePath, options);
-//        final int REQUIRED_SIZE = 200;
-//        int scale = 1;
-//        while (options.outWidth / scale / 2 >= REQUIRED_SIZE
-//                && options.outHeight / scale / 2 >= REQUIRED_SIZE)
-//            scale *= 2;
-//        options.inSampleSize = scale;
-//        options.inJustDecodeBounds = false;
-//
-//        bm = BitmapFactory.decodeFile(selectedImagePath, options);
-//        et_CoverFile.setText(selectedImagePath);
-//        coverThumb.setImageBitmap(bm);
     }
-
-
-
-//
-//    // Storage Permissions
-//    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-//    private static String[] PERMISSIONS_STORAGE = {
-//            Manifest.permission.READ_EXTERNAL_STORAGE,
-//            Manifest.permission.WRITE_EXTERNAL_STORAGE
-//    };
-//
-//    /**
-//     * Checks if the app has permission to write to device storage
-//     *
-//     * If the app does not has permission then the user will be prompted to grant permissions
-//     *
-//     * @param activity
-//     */
-//    public static void verifyStoragePermissions(Activity activity) {
-//        // Check if we have write permission
-//        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//
-//        if (permission != PackageManager.PERMISSION_GRANTED) {
-//            // We don't have permission so prompt the user
-//            ActivityCompat.requestPermissions(
-//                    activity,
-//                    PERMISSIONS_STORAGE,
-//                    REQUEST_EXTERNAL_STORAGE
-//            );
-//        }
-//    }
-
 }
