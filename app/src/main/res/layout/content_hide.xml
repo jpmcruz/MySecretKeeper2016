@@ -95,22 +95,26 @@
 
     <LinearLayout
         android:id="@+id/LinearLayout03"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:orientation="horizontal"
         android:layout_below="@+id/bt_Save"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
+
 
         >
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/textView2" />
 
         <ImageView
             android:layout_width="250dp"
             android:layout_height="250dp"
             android:id="@+id/coverThumb"
             android:scaleType="fitXY"
-            android:layout_gravity="center_horizontal"
          />
 
         <ImageView
@@ -118,10 +122,17 @@
             android:layout_height="250dp"
             android:id="@+id/secretThumb"
             android:scaleType="fitXY"
-            android:layout_gravity="center_horizontal"/>
+            android:paddingLeft="30dp"/>
 
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:id="@+id/stegoThumb"
+        android:scaleType="fitXY"
+        android:layout_below="@+id/LinearLayout03"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>

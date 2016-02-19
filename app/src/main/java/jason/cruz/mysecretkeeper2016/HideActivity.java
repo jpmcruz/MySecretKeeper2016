@@ -17,12 +17,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 public class HideActivity extends AppCompatActivity {
 
@@ -53,21 +57,96 @@ public class HideActivity extends AppCompatActivity {
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+            boolean mExternalStorageAvailable = false;
+            boolean mExternalStorageWriteable = false;
+            String state = Environment.getExternalStorageState();
+
+            if (Environment.MEDIA_MOUNTED.equals(state)) {
+                // Can read and write the media
+                mExternalStorageAvailable = mExternalStorageWriteable = true;
+            } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+                // Can only read the media
+                mExternalStorageAvailable = true;
+                mExternalStorageWriteable = false;
+            } else {
+                // Can't read or write
+                mExternalStorageAvailable = mExternalStorageWriteable = false;
+            }
+            et_CoverFile.setText("\n\nExternal Media: readable="
+                    + mExternalStorageAvailable + " writable=" + mExternalStorageWriteable);
+
+        File directory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/MySecretKeeper2016");
+        directory.mkdirs();
+
     }
 
-    //Hide Button
+    //Browse Cover File Button
     public void fileBrowserCover (View view)
     {
         selectImage();
         fileChooserCounter = 1;
     }
 
-    //Hide Button
+    //Browse Secret File Button
     public void fileBrowserSecret (View view)
     {
         selectImage();
         fileChooserCounter = 2;
     }
+
+    //Hide Button
+    public void hideSecret (View view)
+    {
+        File file1 = new File(et_CoverFile.getText().toString());
+        File file2 = new File(et_SecretFile.getText().toString());
+        File file3 = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/MySecretKeeper2016", System.currentTimeMillis() + "-MSK.jpg");
+        // convert File to byte[]
+
+
+
+        try {
+            FileInputStream inStream = new FileInputStream(file1);
+            FileInputStream inStream2 = new FileInputStream(file2);
+            FileOutputStream outStream = new FileOutputStream(file3);
+            BufferedOutputStream bos = null;
+            FileChannel inChannel = inStream.getChannel();
+            FileChannel inChannel2 = inStream2.getChannel();
+            FileChannel outChannel = outStream.getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+            inChannel2.transferTo(0, inChannel2.size(), outChannel);
+
+            inStream.close();
+            inStream2.close();
+            outStream.close();
+
+            byte[] b = new byte[4];
+            for (int i = 0; i < 4; i++) {
+                int offset = (b.length - 1 - i) * 8;
+                b[i] = (byte) ((file2.length() >>> offset) & 0xFF);
+            }
+            file3.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file3, true);
+            bos = new BufferedOutputStream(fos);
+            bos.write(b);
+            bos.flush();
+            bos.close();
+
+
+            Toast.makeText(getBaseContext(), "File saved successfully!",
+                    Toast.LENGTH_LONG).show();
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
+
 
     private void selectImage() {
         final CharSequence[] items = { "Take Photo", "Choose from Library", "Cancel" };
@@ -112,8 +191,8 @@ public class HideActivity extends AppCompatActivity {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
 
-        File destination = new File(Environment.getExternalStorageDirectory(),
-                System.currentTimeMillis() + ".jpg");
+        File destination = new File(android.os.Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/MySecretKeeper2016", System.currentTimeMillis() + ".jpg");
 
         FileOutputStream fo;
         try {
@@ -121,21 +200,27 @@ public class HideActivity extends AppCompatActivity {
             fo = new FileOutputStream(destination);
             fo.write(bytes.toByteArray());
             fo.close();
+            Toast.makeText(getBaseContext(), "Wrote the camera photo!",
+                    Toast.LENGTH_LONG).show();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Toast.makeText(getBaseContext(), "1 Didnt write the camera photo!",
+                    Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(getBaseContext(), "2 Didnt write the camera photo!",
+                    Toast.LENGTH_LONG).show();
         }
 
         if (fileChooserCounter == 1)
         {
             coverThumb.setImageBitmap(thumbnail);
-            et_CoverFile.setText("From Camera");
+            et_CoverFile.setText(destination.toString());
         }
         else
         {
             secretThumb.setImageBitmap(thumbnail);
-            et_SecretFile.setText("Image");
+            et_SecretFile.setText(destination.toString());
         }
 
     }
