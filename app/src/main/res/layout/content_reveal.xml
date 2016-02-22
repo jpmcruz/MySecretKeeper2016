@@ -15,7 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp" >
+        android:layout_marginTop="5dp"
+        >
 
         <TextView
             android:id="@+id/TextView03"
@@ -38,7 +39,8 @@
             android:id="@+id/bt_BrowseStegoFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Browse" />
+            android:text="Browse"
+            android:onClick="fileBrowserStego" />
     </LinearLayout>
 
     <Button
@@ -49,5 +51,47 @@
         android:layout_centerHorizontal="true"
         android:text="Reveal Secret!"
         android:onClick="revealSecret"/>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/bt_Reveal"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:paddingTop="30dp"
+        >
+
+        <TextView
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/textView2" />
+
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:id="@+id/stegoThumb"
+            android:scaleType="fitXY" />
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/textView3" />
+
+        <TextView
+            android:layout_width="10dp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/textView4" />
+
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:id="@+id/revealThumb"
+            android:scaleType="fitXY" />
+    </LinearLayout>
 
 </RelativeLayout>
