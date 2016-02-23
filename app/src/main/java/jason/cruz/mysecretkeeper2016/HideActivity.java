@@ -127,6 +127,14 @@ public class HideActivity extends AppCompatActivity {
             FileOutputStream fos = new FileOutputStream(file3, true);
             bos = new BufferedOutputStream(fos);
             bos.write(b);
+
+            int mark = 675;
+            byte[] c = new byte[4];
+            for (int i = 0; i < 4; i++) {
+                int offset = (c.length - 1 - i) * 8;
+                c[i] = (byte) ((mark >>> offset) & 0xFF);
+            }
+            bos.write(c);
             bos.flush();
             bos.close();
 

@@ -66,7 +66,8 @@ public class RevealActivity extends AppCompatActivity {
                 "/MySecretKeeper2016", System.currentTimeMillis() + "-Revealed.jpg");
         try {
             RandomAccessFile file = new RandomAccessFile(file1, "rw");
-            file.seek(file.length() - 4);
+
+            file.seek(file.length() - 8);
             long pointer = file.getFilePointer();
             BufferedOutputStream bos = null;
             //---display file saved message---
@@ -82,10 +83,29 @@ public class RevealActivity extends AppCompatActivity {
                 totalRead += bytesRead;
 
             }
+
+            //
+            int bytesRead2 = 0;
+            int totalRead2 = 0;
+            byte[] buffer2 = new byte[4]; // 128k buffer
+            while(totalRead2 < 4) { // go on reading while total bytes read is
+                // less than 1mb
+                bytesRead2 = file.read(buffer2);
+                totalRead2 += bytesRead2;
+
+            }
+
+            int mark_size = buffer[0] << 24 | (buffer[1] & 0xff) << 16 | (buffer[2] & 0xff) << 8
+                    | (buffer[3] & 0xff);
+            et_StegoFile.setText("MSK " + mark_size);
+
+            //
+
+
             int secret_size = buffer[0] << 24 | (buffer[1] & 0xff) << 16 | (buffer[2] & 0xff) << 8
                     | (buffer[3] & 0xff);
 
-            file.seek(file.length() - 4 - Long.valueOf(secret_size));
+            file.seek(file.length() - 8 - Long.valueOf(secret_size));
             pointer = file.getFilePointer();
 
             FileOutputStream out = new FileOutputStream(file2);
