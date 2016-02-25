@@ -64,4 +64,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RevealActivity.class);
         startActivity(intent);
     }
+
+    //FB Button
+    public void fbActivity (View view)
+    {
+        Intent intent = new Intent(this, FacebookActivity.class);
+        startActivity(intent);
+    }
 }
